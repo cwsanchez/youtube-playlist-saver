@@ -5,6 +5,7 @@ I plan on eventually adding a front end that shows you which videos have been de
 To start the app run:
 
 ```
+pip3 install -r requirements.txt
 python3 main.py
 ```
 
