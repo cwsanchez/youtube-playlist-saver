@@ -26,5 +26,6 @@ Post request for submitting all playlists for a channel:
 
 ```
 POST /channel
+
 { id: <channel_id> }
 ```
