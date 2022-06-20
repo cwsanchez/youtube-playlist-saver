@@ -1,0 +1,25 @@
+{
+'kind': 'youtube#playlistItemListResponse', 
+'etag': 'HwjFSZppLHWjy4Q4c2QjPul0gp4', 
+'nextPageToken': 'EAAaBlBUOkNBRQ', 
+'items': [
+		{
+		'kind': 'youtube#playlistItem', 
+		'etag': 'zpjT62ER55X0WyBIhw4WWpaMe3k', 
+		'id': 'UExUUE02VEx2TG1QM1JZTXFMd18yZW95RDFKaG1hY1ZoYi41NkI0NEY2RDEwNTU3Q0M2', 
+		'snippet': {'publishedAt': '2020-07-01T19:21:03Z', 
+		'channelId': 'UClUXuLBYxXUt6X0HupY30rw', 
+		'title': 'Waking Up With Sam Harris #62 - What is True? (with Jordan B. Peterson)', 
+		'description': 'Waking Up With Sam Harris #62 - What is True? (with Jordan B. Peterson)\nLIKE==========SHARE===========COMMENT\nJoin Us Now: https://www.youtube.com/channel/UC50-mzKyA7Nb_h9ovCnUJOA?sub_confirmation=1', 
+		'thumbnails': {'default': {'url': 'https://i.ytimg.com/vi/2lO6WJ9rfs4/default.jpg', 'width': 120, 'height': 90}, 
+		'medium': {'url': 'https://i.ytimg.com/vi/2lO6WJ9rfs4/mqdefault.jpg', 'width': 320, 'height': 180}, 
+		'high': {'url': 'https://i.ytimg.com/vi/2lO6WJ9rfs4/hqdefault.jpg', 'width': 480, 'height': 360}, 
+		'standard': {'url': 'https://i.ytimg.com/vi/2lO6WJ9rfs4/sddefault.jpg', 'width': 640, 'height': 480}}, 
+		'channelTitle': 'Chris Sanchez', 
+		'playlistId': 'PLTPM6TLvLmP3RYMqLw_2eoyD1JhmacVhb', 
+		'position': 0, 
+		'resourceId': {'kind': 'youtube#video', 'videoId': '2lO6WJ9rfs4'}, 
+		'videoOwnerChannelTitle': 'Waking Up with Sam Harris', 'videoOwnerChannelId': 'UC50-mzKyA7Nb_h9ovCnUJOA'}, 
+		'contentDetails': {'videoId': '2lO6WJ9rfs4', 'videoPublishedAt': '2018-01-27T22:00:05Z'}}], 
+		'pageInfo': {'totalResults': 7, 'resultsPerPage': 1}
+}

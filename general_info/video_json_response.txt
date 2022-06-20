@@ -1,0 +1,32 @@
+{
+'kind': 'youtube#videoListResponse', 
+'etag': 'BSwqws2MtpCMToTHc8s6LxVzt68', 
+'items': [
+	{
+	'kind': 'youtube#video', 
+	'etag': 'qdTvAN7GSLsLYYsFCmhTsXW-ZtA', 
+	'id': '2lO6WJ9rfs4', 
+	'snippet': {'publishedAt': '2018-01-27T22:00:05Z', 
+		'channelId': 'UC50-mzKyA7Nb_h9ovCnUJOA', 
+		'title': 'Waking Up With Sam Harris #62 - What is True? (with Jordan B. Peterson)', 
+		'description': 'Waking Up With Sam Harris #62 - What is True? (with Jordan B. Peterson)\nLIKE==========SHARE===========COMMENT\nJoin Us Now: https://www.youtube.com/channel/UC50-mzKyA7Nb_h9ovCnUJOA?sub_confirmation=1', 
+		'thumbnails': {'default': {'url': 'https://i.ytimg.com/vi/2lO6WJ9rfs4/default.jpg', 'width': 120, 'height': 90}, 
+			'medium': {'url': 'https://i.ytimg.com/vi/2lO6WJ9rfs4/mqdefault.jpg', 'width': 320, 'height': 180}, 
+			'high': {'url': 'https://i.ytimg.com/vi/2lO6WJ9rfs4/hqdefault.jpg', 'width': 480, 'height': 360}, 
+			'standard': {'url': 'https://i.ytimg.com/vi/2lO6WJ9rfs4/sddefault.jpg', 'width': 640, 'height': 480}
+		}, 	
+	'channelTitle': 'Waking Up with Sam Harris', 
+	'tags': ['sam harris', 'waking up', 'podcast', 'science', 'religion', 'politics', 'current events', 'Waking Up With Sam Harris #62'], 
+	'categoryId': '28', 
+	'liveBroadcastContent': 'none', 
+	'localized': {'title': 'Waking Up With Sam Harris #62 - What is True? (with Jordan B. Peterson)', 
+		'description': 'Waking Up With Sam Harris #62 - What is True? (with Jordan B. Peterson)\nLIKE==========SHARE===========COMMENT\nJoin Us Now: https://www.youtube.com/channel/UC50-mzKyA7Nb_h9ovCnUJOA?sub_confirmation=1'}, 
+		'defaultAudioLanguage': 'en'
+		}, 
+	'contentDetails': {'duration': 'PT2H15M57S', 'dimension': '2d', 'definition': 'sd', 'caption': 'false', 'licensedContent': False, 'contentRating': {}, 'projection': 'rectangular'}, 
+	'statistics': {'viewCount': '72422', 'favoriteCount': '0', 'commentCount': '731'}, 
+	'topicDetails': {'topicCategories': ['https://en.wikipedia.org/wiki/Society']}, 
+	'recordingDetails': {}
+	}, 
+}
+

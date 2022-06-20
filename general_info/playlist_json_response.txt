@@ -1,0 +1,20 @@
+{'kind': 'youtube#playlistListResponse', 
+'etag': '6U1gPZ9pz0jOSWuurU7bn6tCx3E', 
+'pageInfo': {'totalResults': 1, 'resultsPerPage': 5}, 
+'items': [
+	{'kind': 'youtube#playlist', 
+	'etag': '_phaxbrM1pxJRzenkWfFDh94rlA', 
+	'id': 'PLTPM6TLvLmP3RYMqLw_2eoyD1JhmacVhb', 
+	'snippet': {'publishedAt': '2020-07-01T19:21:03Z', 
+		'channelId': 'UClUXuLBYxXUt6X0HupY30rw', 
+		'title': '14 Hours of Sam and Jordan', 
+		'description': '', 
+		'thumbnails': {'default': {'url': 'https://i.ytimg.com/vi/2lO6WJ9rfs4/default.jpg', 'width': 120, 'height': 90}, 
+			'medium': {'url': 'https://i.ytimg.com/vi/2lO6WJ9rfs4/mqdefault.jpg', 'width': 320, 'height': 180}, 
+			'high': {'url': 'https://i.ytimg.com/vi/2lO6WJ9rfs4/hqdefault.jpg', 'width': 480, 'height': 360}, 
+			'standard': {'url': 'https://i.ytimg.com/vi/2lO6WJ9rfs4/sddefault.jpg', 'width': 640, 'height': 480}
+	}, 
+	'channelTitle': 'Chris Sanchez', 
+	'localized': {'title': '14 Hours of Sam and Jordan', 'description': ''}}, 
+	'contentDetails': {'itemCount': 7}}]
+}

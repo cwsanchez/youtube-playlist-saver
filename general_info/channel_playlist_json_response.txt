@@ -1,0 +1,11 @@
+{'kind': 'youtube#playlistListResponse', 
+'etag': 'iQVvRAs0za_1g6ncfYIVuIHboUo', 
+'nextPageToken': 'CAUQAA', 
+'pageInfo': {'totalResults': 26, 'resultsPerPage': 5}, 
+'items': [
+	{
+	'kind': 'youtube#playlist', 
+	'etag': 'LVnojY3jWk1NT7_xIYlFp1Qlmwk', 
+	'id': 'PLTPM6TLvLmP0pPFP5dOoJHHTDgHRppvl8'
+	}
+]

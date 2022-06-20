@@ -1,0 +1,31 @@
+playlists_videos = Table(
+    "playlists_videos",
+    Base.metadata,
+    Column( "playlistId", ForeignKey("playlists.id") ),
+    Column( "videoId", ForeignKey("videos.id") )
+)
+
+class Playlist( Base ):
+    __tablename__ = 'playlists'
+
+    id = Column( String, primary_key=True )
+    name = Column( String )
+    description = Column( String )
+    channelId = Column( String, ForeignKey("channels.id") )
+    videos = relationship( "Video",  secondary=playlists_videos, backref="playlists" )
+
+class Video( Base ):
+    __tablename__ = 'videos'
+
+    id = Column( String, primary_key=True )
+    name = Column ( String )
+    description = Column( String )
+    channelId = Column( String, ForeignKey("channels.id") )
+
+class Channel( Base ):
+    __tablename__ = 'channels'
+
+    id = Column( String, primary_key=True )
+    name = Column( String )
+    videos = relationship( "Video", backref="channel" )
+    playlists = relationship( "Playlist", backref="channel" )
