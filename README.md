@@ -30,3 +30,8 @@ POST /channel
 
 { id: <channel_id> }
 ```
+
+Note, you will need your own YouTube API key. Place it in a file named '.env' in the project directory like so:
+```
+SECRET_KEY = "YOUR_KEY_HERE"
+```
