@@ -1,6 +1,5 @@
 # Youtube Playlist Saver
 API that saves Youtube playlist data to a database and can return it when queried. 
-I plan on eventually adding a front end that shows you which videos have been deleted since the playlist was added.
 
 To start the app run:
 
