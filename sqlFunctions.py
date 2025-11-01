@@ -39,11 +39,13 @@ def addNewVideoToPlaylist( video_dict, playlist_id ):
     if playlist_video_results is None:
         # playlist_result.videos.append( video )
 
+        # Corrected insert syntax for SQLAlchemy 2.x: use .values() method
         from sqlalchemy import insert
         session.execute(
-            insert( playlists_videos, 
-                values = [ {"playlistId" : playlist_id, "videoId" : video_id } ]
-        ))
+            insert(playlists_videos).values(
+                [{"playlistId": playlist_id, "videoId": video_id}]
+            )
+        )
 #        print( 
 #            100 * '=', 
 #            '@addNewVideoToPlaylist', 
