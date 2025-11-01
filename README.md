@@ -13,6 +13,9 @@ This app saves YouTube playlist and channel metadata to a local SQLite database,
 2. Add your YouTube API key to `.env`: `SECRET_KEY="YOUR_KEY_HERE"`
 3. Run the app: `streamlit run streamlit_app.py`
 
+Optional: For PostgreSQL (e.g., Neon), set DATABASE_URL in .streamlit/secrets.toml (local) or Streamlit Cloud secrets (TOML format): DATABASE_URL = "postgresql://user:password@host.neon.tech/dbname?sslmode=require"
+Note: Create the DB on Neon first. The app will create tables if missing.
+
 Note: If you encounter database schema errors after updating the app, delete `playlist_data.db` and re-add your data.
 
 ## Usage
