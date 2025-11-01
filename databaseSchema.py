@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Table, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Table, ForeignKey, DateTime
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from sqlalchemy_utils import database_exists, create_database
 
@@ -14,7 +14,8 @@ playlists_videos = Table(
     "playlists_videos",
     Base.metadata,
     Column( "playlistId", ForeignKey("playlists.id") ),
-    Column( "videoId", ForeignKey("videos.id") )
+    Column( "videoId", ForeignKey("videos.id") ),
+    Column("removed_at", DateTime, nullable=True)
 )
 
 class Playlist( Base ):
@@ -24,6 +25,7 @@ class Playlist( Base ):
     name = Column( String )
     description = Column( String )
     channelId = Column( String, ForeignKey("channels.id") )
+    last_fetched = Column(DateTime, nullable=True)
     videos = relationship( "Video",  secondary=playlists_videos, backref="playlists" )
 
 class Video( Base ):
@@ -33,6 +35,10 @@ class Video( Base ):
     name = Column ( String )
     description = Column( String )
     channelId = Column( String, ForeignKey("channels.id") )
+    view_count = Column(Integer, nullable=True)
+    like_count = Column(Integer, nullable=True)
+    duration = Column(String, nullable=True)
+    published_at = Column(DateTime, nullable=True)
 
 class Channel( Base ):
     __tablename__ = 'channels'

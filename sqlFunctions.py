@@ -1,4 +1,6 @@
 from databaseSchema import *
+import datetime
+from sqlalchemy import insert, update
 
 def queryPlaylistVideo( video_id, playlist_id ):
     playlistsVideosQuery = session.query( \
@@ -40,10 +42,9 @@ def addNewVideoToPlaylist( video_dict, playlist_id ):
         # playlist_result.videos.append( video )
 
         # Corrected insert syntax for SQLAlchemy 2.x: use .values() method
-        from sqlalchemy import insert
         session.execute(
             insert(playlists_videos).values(
-                [{"playlistId": playlist_id, "videoId": video_id}]
+                [{"playlistId": playlist_id, "videoId": video_id, "removed_at": None}]
             )
         )
 #        print( 
@@ -75,11 +76,24 @@ def addVideo( video_dict ):
     video_description = snippet["description"]
     video_channel_id = snippet["channelId"]
 
+    # Extract additional fields
+    view_count = video_dict.get("statistics", {}).get("viewCount")
+    view_count = int(view_count) if view_count else None
+    like_count = video_dict.get("statistics", {}).get("likeCount")
+    like_count = int(like_count) if like_count else None
+    duration = video_dict.get("contentDetails", {}).get("duration")
+    published_at_str = snippet.get("publishedAt")
+    published_at = datetime.datetime.fromisoformat(published_at_str.replace("Z", "+00:00")) if published_at_str else None
+
     video = Video(
         id = video_id,
         name = video_name,
         description = video_description,
-        channelId = video_channel_id
+        channelId = video_channel_id,
+        view_count = view_count,
+        like_count = like_count,
+        duration = duration,
+        published_at = published_at
     )
     session.merge( video )
     session.commit()
@@ -127,3 +141,32 @@ def get_all_playlists_for_channel(channel_id):
     # New function: Returns playlists for a given channel for browsing
     channel = getChannel(channel_id)
     return channel.playlists if channel else []
+
+def refresh_playlist(playlist_id, api_key):
+    from playlistRequests import request_playlist, request_playlist_videos, request_videos
+    # Fetch current
+    playlist_data = request_playlist(playlist_id, api_key)  # To get channel etc if needed
+    video_ids = request_playlist_videos(playlist_id, api_key)
+    video_data = request_videos(video_ids, api_key)
+    addVideos(video_data)  # Update/add videos
+    # Get current active associations
+    active_query = session.query(playlists_videos).filter(playlists_videos.c.playlistId == playlist_id, playlists_videos.c.removed_at.is_(None))
+    active_vids = [row.videoId for row in active_query.all()]
+    # Mark removed
+    for vid in active_vids:
+        if vid not in video_ids:
+            session.execute(playlists_videos.update().where(playlists_videos.c.playlistId == playlist_id, playlists_videos.c.videoId == vid).values(removed_at=datetime.datetime.now()))
+    # Add new
+    for vid in set(video_ids) - set(active_vids):
+        session.execute(insert(playlists_videos).values({"playlistId": playlist_id, "videoId": vid, "removed_at": None}))
+    session.commit()
+    # Update last_fetched
+    playlist = getPlaylist(playlist_id)
+    playlist.last_fetched = datetime.datetime.now()
+    session.commit()
+
+def get_active_videos(playlist_id):
+    return session.query(Video).join(playlists_videos).filter(playlists_videos.c.playlistId == playlist_id, playlists_videos.c.removed_at.is_(None)).all()
+
+def get_removed_videos(playlist_id):
+    return session.query(Video).join(playlists_videos).filter(playlists_videos.c.playlistId == playlist_id, playlists_videos.c.removed_at.isnot(None)).all()

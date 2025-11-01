@@ -1,5 +1,6 @@
 import json
 import requests
+import time
 
 def chunks(lst, n):
     return [lst[i:i+n] for i in range(0, len(lst), n)]
@@ -68,6 +69,7 @@ def request_channel( channel_id, api_key ):
         request_url,
         headers = request_headers
     )
+    time.sleep(0.5)
     channel_data = json.loads( json_channel.text )
 
     # Check for API error in response
@@ -93,6 +95,7 @@ def request_channel_items( channel_id, api_key ):
         request_url,
         headers = request_headers
     )
+    time.sleep(0.5)
     channel_playlist_data = json.loads( json_channel_playlists.text )
 
     # Check for API error in response
@@ -128,6 +131,7 @@ def request_channel_all_items( channel_id, api_key ):
             request_url,
             headers = request_headers
         )
+        time.sleep(0.5)
         channel_playlist_all_data = json.loads( json_channel_all_playlists.text )
 
         # Check for API error in response
@@ -182,6 +186,7 @@ def request_playlist( playlist_id, api_key):
         request_url,
         headers = request_headers
     )
+    time.sleep(0.5)
     playlist_data = json.loads( json_playlist.text )
 
     # Check for API error in response
@@ -217,6 +222,7 @@ def request_playlist_items( playlist_id, api_key, max_results ):
             request_url,
             headers = request_headers
         )
+        time.sleep(0.5)
         playlist_data = json.loads( json_playlist.text )
 
         # Check for API error in response
@@ -277,6 +283,7 @@ def request_videos( video_ids, api_key ):
             request_url,
             headers = request_headers
         )
+        time.sleep(0.5)
         video_data = json.loads( json_video.text )
 
         # Check for API error in response
