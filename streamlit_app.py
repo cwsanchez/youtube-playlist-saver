@@ -34,10 +34,11 @@ if st.session_state.get("page") == "add" or not st.session_state.get("page"):
                 if input_type == "Playlist":
                     playlist_id = extract_playlist_id(url_input)
                     playlist_data = request_playlist(playlist_id, api_key)
-                    addPlaylist(playlist_data)
                     channel_id = playlist_data["items"][0]["snippet"]["channelId"]
                     channel_data = request_channel(channel_id, api_key)
+                    # Add channel first to satisfy foreign key constraint on playlists.channelId
                     addChannel(channel_data)
+                    addPlaylist(playlist_data)
                     video_ids = request_playlist_videos(playlist_id, api_key)
                     video_data = request_videos(video_ids, api_key)
                     addVideos(video_data)
