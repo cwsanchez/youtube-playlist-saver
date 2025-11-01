@@ -46,17 +46,13 @@ class GetPlaylist(Resource):
 
         if playlist == None:
             abort( 404 )
-        
+
         all_video_info = []
 
         for video in playlist.videos:
-            video_id = video.id
-            video_name = video.name
-            video_channel = video.channelId
-            video_info = [ video_id, video_name, video_channel ]
+            video_info = {"id": video.id, "name": video.name, "channelId": video.channelId}  # Changed from flat list to dict list
+            all_video_info.append(video_info)
 
-            all_video_info += video_info
-    
         response = {
             "id": playlist.id,
             "name": playlist.name,
@@ -71,21 +67,18 @@ class GetChannel(Resource):
     def get(self, channel_id):
         channel = getChannel( channel_id=channel_id )
 
+        if channel == None:
+            abort( 404 )
+
         all_playlist_ids = []
         for playlist in channel.playlists:
-            playlist_id = playlist.id
-            playlist_info = [ playlist_id ]
-            
-            all_playlist_ids += playlist_id
+            all_playlist_ids.append(playlist.id)  # Fixed: was all_playlist_ids += playlist_id, which flattens string
 
         response = {
             "id": channel.id,
             "name": channel.name,
             "playlists": all_playlist_ids
         }
-
-        if channel == None:
-            abort( 404 )
 
         return response
 

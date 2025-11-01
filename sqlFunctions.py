@@ -72,19 +72,15 @@ def addVideo( video_dict ):
     video_name = snippet["title"]
     video_description = snippet["description"]
     video_channel_id = snippet["channelId"]
-    
-    videoQuery = session.query( Video )
-    videoIdQuery = videoQuery.filter( Video.id == video_id ).first()
 
-    if videoIdQuery == None:
-        video = Video(
-            id = video_id,
-            name = video_name,
-            description = video_description,
-            channelId = video_channel_id
-        )
-        session.add( video )
-        session.commit()
+    video = Video(
+        id = video_id,
+        name = video_name,
+        description = video_description,
+        channelId = video_channel_id
+    )
+    session.merge( video )
+    session.commit()
 
 def addVideos( video_dicts ):
     items = video_dicts["items"]
@@ -98,19 +94,15 @@ def addPlaylist( playlist_dict ):
     playlist_name = snippet["title"]
     playlist_description = snippet["description"]
     playlist_channel_id = snippet["channelId"]
-    
-    playlistQuery = session.query( Playlist )
-    playlistIdQuery = playlistQuery.filter( Playlist.id == playlist_id ).first()
 
-    if playlistIdQuery == None:
-        playlist = Playlist( 
-            id = playlist_id,
-            name = playlist_name,
-            description = playlist_description,
-            channelId = playlist_channel_id
-        )
-        session.add( playlist )
-        session.commit()
+    playlist = Playlist(
+        id = playlist_id,
+        name = playlist_name,
+        description = playlist_description,
+        channelId = playlist_channel_id
+    )
+    session.merge( playlist )
+    session.commit()
 
 def addChannel( channel_dict ):
     items = channel_dict["items"][0]
@@ -118,13 +110,18 @@ def addChannel( channel_dict ):
     channel_id = items["id"]
     channel_name = snippet["title"]
 
-    channelQuery = session.query( Channel )
-    channelIdQuery = channelQuery.filter( Channel.id == channel_id ).first()
+    channel = Channel(
+        id = channel_id,
+        name = channel_name
+    )
+    session.merge( channel )  # Use merge for upsert to handle duplicates gracefully
+    session.commit()
 
-    if channelIdQuery == None:
-        channel = Channel(
-            id = channel_id,
-            name = channel_name
-        )
-        session.add( channel )
-        session.commit()
+def get_all_channels():
+    # New function: Returns all saved channels for dropdown population in Streamlit
+    return session.query(Channel).all()
+
+def get_all_playlists_for_channel(channel_id):
+    # New function: Returns playlists for a given channel for browsing
+    channel = getChannel(channel_id)
+    return channel.playlists if channel else []

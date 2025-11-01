@@ -1,36 +1,24 @@
-# Youtube Playlist Saver
-API that saves Youtube playlist data to a database and can return it when queried. 
+# YouTube Playlist Saver
 
-To start the app run:
+This app saves YouTube playlist and channel metadata to a local SQLite database, allowing you to track videos and detect deletions over time. Originally built with a Flask backend, it now features a Streamlit frontend for easy interaction, directly using the API request and database functions.
 
-```
-pip3 install -r requirements.txt
-python3 main.py
-```
+## Features
+- Add playlists or entire channels by URL or ID.
+- Browse saved channels, playlists, and videos via dropdowns.
+- Supports URL parsing for playlists (e.g., ?list=...) and channels (e.g., /channel/UC... or @handle).
+- Database stores metadata to preserve history even if videos are deleted on YouTube.
 
-Get request for playlist info:
+## Setup
+1. Install dependencies: `pip install -r requirements.txt`
+2. Add your YouTube API key to `.env`: `SECRET_KEY="YOUR_KEY_HERE"`
+3. Run the app: `streamlit run streamlit_app.py`
 
-```
-GET /playlist/<playlist_id>
-```
+## Usage
+- **Add Data**: Enter a playlist/channel URL or ID, select type, and save.
+- **Browse**: Select channel > playlist to view details in a table.
 
-Post request for submitting playlist info:
+Note: The original Flask API (run via `python main.py`) is retained for future extensions but not used in the Streamlit app.
 
-```
-POST /playlist
-
-{ id: <playlist_id }
-```
-
-Post request for submitting all playlists for a channel:
-
-```
-POST /channel
-
-{ id: <channel_id> }
-```
-
-Note, you will need your own YouTube API key. Place it in a file named '.env' in the project directory like so:
-```
-SECRET_KEY = "YOUR_KEY_HERE"
-```
+## Dependencies
+- Streamlit for frontend
+- Requests, SQLAlchemy, etc., for backend logic (see requirements.txt)

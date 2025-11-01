@@ -1,15 +1,16 @@
 import json
 import requests
 
-def build_url( 
-        api_base_url, 
-        api_parts, 
-        api_key, 
-        resource_id=None, 
+def build_url(
+        api_base_url,
+        api_parts,
+        api_key,
+        resource_id=None,
         playlist_id=None,
         channel_id=None,
         max_results=None,
-        video_ids=None
+        video_ids=None,
+        for_handle=None
 ):
     api_part_url = ""
     api_key = f"&key={api_key}"
@@ -42,6 +43,9 @@ def build_url(
             else:
                 video_ids_url += f"%2C{video}"
         request_url += video_ids_url
+
+    if for_handle is not None:
+        request_url += f"&forHandle={for_handle}"  # Added support for channel handles like @username
 
     return request_url
 
@@ -86,24 +90,39 @@ def request_channel_items( channel_id, api_key ):
     return channel_playlist_data
 
 def request_channel_all_items( channel_id, api_key, max_results ):
+    # Added pagination to handle large channel playlists
     request_headers = { "Accept": "application/json" }
     api_parts = [ "id" ]
     api_base_url = "https://www.googleapis.com/youtube/v3/playlists"
 
-    request_url = build_url(
-        api_base_url = api_base_url,
-        api_parts = api_parts,
-        channel_id = channel_id,
-        api_key = api_key,
-        max_results = max_results
-    )
+    all_items = []
+    page_token = None
 
-    json_channel_all_playlists = requests.get(
-        request_url,
-        headers = request_headers
-    )
-    channel_playlist_all_data = json.loads( json_channel_all_playlists.text )
+    while True:
+        request_url = build_url(
+            api_base_url = api_base_url,
+            api_parts = api_parts,
+            channel_id = channel_id,
+            api_key = api_key,
+            max_results = min(max_results - len(all_items), 50) if max_results else 50
+        )
+        if page_token:
+            request_url += f"&pageToken={page_token}"
 
+        json_channel_all_playlists = requests.get(
+            request_url,
+            headers = request_headers
+        )
+        channel_playlist_all_data = json.loads( json_channel_all_playlists.text )
+
+        all_items.extend(channel_playlist_all_data.get("items", []))
+
+        page_token = channel_playlist_all_data.get("nextPageToken")
+        if not page_token or (max_results and len(all_items) >= max_results):
+            break
+
+    # Return in the same format as before
+    channel_playlist_all_data["items"] = all_items
     return channel_playlist_all_data
 
 def request_channel_playlists( channel_id, api_key ):
@@ -152,21 +171,35 @@ def request_playlist_items( playlist_id, api_key, max_results ):
     request_headers = { "Accept": "application/json" }
     api_parts = [ "contentDetails" ]
     api_base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
-    
-    request_url = build_url( 
-        api_base_url = api_base_url,
-        api_parts = api_parts,
-        playlist_id = playlist_id,
-        api_key = api_key,
-        max_results = max_results
-    )
 
-    json_playlist = requests.get(
-        request_url,
-        headers = request_headers
-    )
-    playlist_data = json.loads( json_playlist.text )
+    all_items = []
+    page_token = None
 
+    while True:
+        request_url = build_url(
+            api_base_url = api_base_url,
+            api_parts = api_parts,
+            playlist_id = playlist_id,
+            api_key = api_key,
+            max_results = min(max_results - len(all_items), 50) if max_results else 50
+        )
+        if page_token:
+            request_url += f"&pageToken={page_token}"
+
+        json_playlist = requests.get(
+            request_url,
+            headers = request_headers
+        )
+        playlist_data = json.loads( json_playlist.text )
+
+        all_items.extend(playlist_data.get("items", []))
+
+        page_token = playlist_data.get("nextPageToken")
+        if not page_token or (max_results and len(all_items) >= max_results):
+            break
+
+    # Return in the same format
+    playlist_data["items"] = all_items
     return playlist_data
 
 def request_playlist_videos( playlist_id, api_key ):
