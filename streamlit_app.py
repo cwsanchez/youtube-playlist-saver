@@ -96,7 +96,7 @@ if st.session_state.get("page") == "browse":
 
                 active_videos = get_active_videos(playlist_id)
                 video_data = [{"No.": i+1, "ID": v.id, "Title": v.name, "Description": v.description, "Channel ID": v.channelId, "Views": v.view_count, "Likes": v.like_count, "Duration": v.duration, "Published": v.published_at.strftime("%Y-%m-%d %H:%M") if v.published_at else ""} for i, v in enumerate(active_videos)]
-                st.dataframe(video_data, height=400)
+                st.dataframe(video_data, use_container_width=True, height=800)
 
                 removed_videos = get_removed_videos(playlist_id)
                 count = len(removed_videos)
@@ -104,7 +104,7 @@ if st.session_state.get("page") == "browse":
                     st.warning(f"{count} items have been deleted from this playlist")
                     st.subheader("Deleted Videos")
                     removed_data = [{"ID": v.id, "Title": v.name, "Description": v.description, "Channel ID": v.channelId, "Views": v.view_count, "Likes": v.like_count, "Duration": v.duration, "Published": v.published_at.strftime("%Y-%m-%d %H:%M") if v.published_at else "", "Removed At": queryPlaylistVideo(v.id, playlist_id).removed_at.strftime("%Y-%m-%d %H:%M") if queryPlaylistVideo(v.id, playlist_id).removed_at else ""} for v in removed_videos]
-                    st.dataframe(removed_data, height=200)
+                    st.dataframe(removed_data, use_container_width=True, height=200)
                 else:
                     st.success("No videos have been deleted!")
             else:
