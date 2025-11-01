@@ -1,8 +1,10 @@
+import streamlit as st
 from sqlalchemy import create_engine, Column, Integer, String, Table, ForeignKey, DateTime
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from sqlalchemy_utils import database_exists, create_database
 
-engine = create_engine( 'sqlite:///playlist_data.db', echo=not True )
+db_url = st.secrets.get("DATABASE_URL", 'sqlite:///playlist_data.db')  # Fallback to local SQLite if no secret
+engine = create_engine(db_url, echo=False, pool_pre_ping=True)  # Add pool_pre_ping for cloud Postgres resilience
 
 Session = sessionmaker()
 Session.configure( bind=engine )
@@ -48,5 +50,5 @@ class Channel( Base ):
     videos = relationship( "Video", backref="channel" )
     playlists = relationship( "Playlist", backref="channel" )
 
-if not database_exists( engine.url ):
-    Base.metadata.create_all( engine )
+# For SQLite only: if not database_exists(engine.url): Base.metadata.create_all(engine)
+Base.metadata.create_all(engine)  # Safe for existing tables
