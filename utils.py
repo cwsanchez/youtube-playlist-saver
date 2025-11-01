@@ -25,6 +25,8 @@ def extract_channel_id(url, api_key):
             for_handle=f"@{handle}"
         )
         response = requests.get(request_url).json()
+        if "error" in response:
+            raise ValueError(f"YouTube API error resolving handle: {response['error']['message']}")
         if response.get("items"):
             return response["items"][0]["id"]
     return url  # Fallback if not a URL

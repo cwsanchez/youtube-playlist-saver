@@ -67,6 +67,11 @@ def request_channel( channel_id, api_key ):
     )
     channel_data = json.loads( json_channel.text )
 
+    # Check for API error in response
+    if "error" in channel_data:
+        error = channel_data["error"]
+        raise ValueError(f"YouTube API error: {error.get('code', 'Unknown')} - {error.get('message', 'No message')}")
+
     return channel_data
 
 def request_channel_items( channel_id, api_key ):
@@ -86,6 +91,11 @@ def request_channel_items( channel_id, api_key ):
         headers = request_headers
     )
     channel_playlist_data = json.loads( json_channel_playlists.text )
+
+    # Check for API error in response
+    if "error" in channel_playlist_data:
+        error = channel_playlist_data["error"]
+        raise ValueError(f"YouTube API error: {error.get('code', 'Unknown')} - {error.get('message', 'No message')}")
 
     return channel_playlist_data
 
@@ -114,6 +124,11 @@ def request_channel_all_items( channel_id, api_key, max_results ):
             headers = request_headers
         )
         channel_playlist_all_data = json.loads( json_channel_all_playlists.text )
+
+        # Check for API error in response
+        if "error" in channel_playlist_all_data:
+            error = channel_playlist_all_data["error"]
+            raise ValueError(f"YouTube API error: {error.get('code', 'Unknown')} - {error.get('message', 'No message')}")
 
         all_items.extend(channel_playlist_all_data.get("items", []))
 
@@ -165,6 +180,11 @@ def request_playlist( playlist_id, api_key):
     )
     playlist_data = json.loads( json_playlist.text )
 
+    # Check for API error in response
+    if "error" in playlist_data:
+        error = playlist_data["error"]
+        raise ValueError(f"YouTube API error: {error.get('code', 'Unknown')} - {error.get('message', 'No message')}")
+
     return playlist_data
 
 def request_playlist_items( playlist_id, api_key, max_results ):
@@ -191,6 +211,11 @@ def request_playlist_items( playlist_id, api_key, max_results ):
             headers = request_headers
         )
         playlist_data = json.loads( json_playlist.text )
+
+        # Check for API error in response
+        if "error" in playlist_data:
+            error = playlist_data["error"]
+            raise ValueError(f"YouTube API error: {error.get('code', 'Unknown')} - {error.get('message', 'No message')}")
 
         all_items.extend(playlist_data.get("items", []))
 
@@ -241,6 +266,11 @@ def request_videos( video_ids, api_key ):
             headers = request_headers
     )
     video_data = json.loads( json_video.text )
+
+    # Check for API error in response
+    if "error" in video_data:
+        error = video_data["error"]
+        raise ValueError(f"YouTube API error: {error.get('code', 'Unknown')} - {error.get('message', 'No message')}")
 
     return video_data
 
