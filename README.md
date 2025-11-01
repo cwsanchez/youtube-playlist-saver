@@ -17,6 +17,12 @@ This app saves YouTube playlist and channel metadata to a local SQLite database,
 - **Add Data**: Enter a playlist/channel URL or ID, select type, and save.
 - **Browse**: Select channel > playlist to view details in a table.
 
+## Deployment to Streamlit Cloud
+1. Push your repo to GitHub.
+2. Create a new app on share.streamlit.io, link to your repo and streamlit_app.py.
+3. In app settings > Secrets, add: SECRET_KEY = "your_youtube_api_key_here" (in TOML format, with quotes).
+4. Redeploy.
+
 Note: The original Flask API (run via `python main.py`) is retained for future extensions but not used in the Streamlit app.
 
 ## Dependencies
