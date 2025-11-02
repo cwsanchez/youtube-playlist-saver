@@ -11,11 +11,12 @@ def get_session(): return SessionLocal()
 
 Base = declarative_base()
 
+# Make FK constraints deferrable to check at commit, fixing violation during refresh when videos/associations are inserted in same transaction
 playlists_videos = Table(
     "playlists_videos",
     Base.metadata,
-    Column( "playlistId", ForeignKey("playlists.id") ),
-    Column( "videoId", ForeignKey("videos.id") ),
+    Column("playlistId", ForeignKey("playlists.id", deferrable=True, initially_deferred=True)),
+    Column("videoId", ForeignKey("videos.id", deferrable=True, initially_deferred=True)),
     Column("removed_at", DateTime, nullable=True)
 )
 
