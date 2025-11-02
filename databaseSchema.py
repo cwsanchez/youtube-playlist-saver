@@ -6,9 +6,8 @@ from sqlalchemy_utils import database_exists, create_database
 db_url = st.secrets.get("DATABASE_URL", 'sqlite:///playlist_data.db')  # Fallback to local SQLite if no secret
 engine = create_engine(db_url, echo=False, pool_pre_ping=True)  # Add pool_pre_ping for cloud Postgres resilience
 
-Session = sessionmaker()
-Session.configure( bind=engine )
-session = Session()
+SessionLocal = sessionmaker(bind=engine)
+def get_session(): return SessionLocal()
 
 Base = declarative_base()
 

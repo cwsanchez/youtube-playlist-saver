@@ -4,7 +4,7 @@ from decouple import config
 from playlistRequests import request_playlist, request_channel, request_playlist_videos, request_videos, request_channel_playlists
 from sqlFunctions import addPlaylist, addChannel, addVideos, addNewVideosToPlaylist, get_all_channels, get_all_playlists_for_channel, getPlaylist, refresh_playlist, get_active_videos, get_removed_videos, queryPlaylistVideo
 from utils import extract_playlist_id, extract_channel_id
-from databaseSchema import session  # For direct DB access
+from databaseSchema import get_session
 
 # Dual loading for compatibility: prefers st.secrets (for Streamlit Cloud/local with secrets.toml), falls back to decouple (for local .env)
 try:
@@ -63,12 +63,8 @@ if st.session_state.get("page") == "add" or not st.session_state.get("page"):
                 # Error handling for API issues or invalid inputs
                 if "quota" in str(e).lower():
                     st.error("API quota likely exceeded. Wait 24h or get more quota.")
-                    # Rollback session to clean up after error, preventing PendingRollbackError on future queries
-                    session.rollback()
                 else:
                     st.error(f"Error: {str(e)} (Check API key or ID validity)")
-                    # Rollback session to clean up after error, preventing PendingRollbackError on future queries
-                    session.rollback()
 
 if st.session_state.get("page") == "browse":
     st.header("Browse Saved Playlists")
