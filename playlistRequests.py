@@ -1,15 +1,20 @@
 import json
 import requests
+import time
 
-def build_url( 
-        api_base_url, 
-        api_parts, 
-        api_key, 
-        resource_id=None, 
+def chunks(lst, n):
+    return [lst[i:i+n] for i in range(0, len(lst), n)]
+
+def build_url(
+        api_base_url,
+        api_parts,
+        api_key,
+        resource_id=None,
         playlist_id=None,
         channel_id=None,
         max_results=None,
-        video_ids=None
+        video_ids=None,
+        for_handle=None
 ):
     api_part_url = ""
     api_key = f"&key={api_key}"
@@ -43,6 +48,9 @@ def build_url(
                 video_ids_url += f"%2C{video}"
         request_url += video_ids_url
 
+    if for_handle is not None:
+        request_url += f"&forHandle={for_handle}"  # Added support for channel handles like @username
+
     return request_url
 
 def request_channel( channel_id, api_key ):
@@ -61,7 +69,13 @@ def request_channel( channel_id, api_key ):
         request_url,
         headers = request_headers
     )
+    time.sleep(0.5)
     channel_data = json.loads( json_channel.text )
+
+    # Check for API error in response
+    if "error" in channel_data:
+        error = channel_data["error"]
+        raise ValueError(f"YouTube API error: {error.get('code', 'Unknown')} - {error.get('message', 'No message')}")
 
     return channel_data
 
@@ -81,43 +95,71 @@ def request_channel_items( channel_id, api_key ):
         request_url,
         headers = request_headers
     )
+    time.sleep(0.5)
     channel_playlist_data = json.loads( json_channel_playlists.text )
+
+    # Check for API error in response
+    if "error" in channel_playlist_data:
+        error = channel_playlist_data["error"]
+        raise ValueError(f"YouTube API error: {error.get('code', 'Unknown')} - {error.get('message', 'No message')}")
 
     return channel_playlist_data
 
-def request_channel_all_items( channel_id, api_key, max_results ):
+def request_channel_all_items( channel_id, api_key ):
+    # Added pagination to handle large channel playlists, always fetch all with per_page=50 to respect API limits (maxResults 0-50 per page)
     request_headers = { "Accept": "application/json" }
     api_parts = [ "id" ]
     api_base_url = "https://www.googleapis.com/youtube/v3/playlists"
 
-    request_url = build_url(
-        api_base_url = api_base_url,
-        api_parts = api_parts,
-        channel_id = channel_id,
-        api_key = api_key,
-        max_results = max_results
-    )
+    per_page = 50
+    remaining = float('inf')
+    all_items = []
+    page_token = None
 
-    json_channel_all_playlists = requests.get(
-        request_url,
-        headers = request_headers
-    )
-    channel_playlist_all_data = json.loads( json_channel_all_playlists.text )
+    while True:
+        request_url = build_url(
+            api_base_url = api_base_url,
+            api_parts = api_parts,
+            channel_id = channel_id,
+            api_key = api_key,
+            max_results = min(per_page, remaining)
+        )
+        if page_token:
+            request_url += f"&pageToken={page_token}"
 
+        json_channel_all_playlists = requests.get(
+            request_url,
+            headers = request_headers
+        )
+        time.sleep(0.5)
+        channel_playlist_all_data = json.loads( json_channel_all_playlists.text )
+
+        # Check for API error in response
+        if "error" in channel_playlist_all_data:
+            error = channel_playlist_all_data["error"]
+            raise ValueError(f"YouTube API error: {error.get('code', 'Unknown')} - {error.get('message', 'No message')}")
+
+        all_items.extend(channel_playlist_all_data.get("items", []))
+        remaining -= len(channel_playlist_all_data.get("items", []))
+        page_token = channel_playlist_all_data.get("nextPageToken")
+        if not page_token or remaining <= 0:
+            break
+
+    # Return in the same format as before
+    channel_playlist_all_data["items"] = all_items
     return channel_playlist_all_data
 
 def request_channel_playlists( channel_id, api_key ):
-    channel_playlist_data = request_channel_items( 
+    channel_playlist_data = request_channel_items(
         channel_id = channel_id,
         api_key = api_key
     )
 
     itemCount = channel_playlist_data["pageInfo"]["totalResults"]
 
-    channel_all_playlist_data = request_channel_all_items( 
+    channel_all_playlist_data = request_channel_all_items(
         channel_id=channel_id,
-        api_key=api_key,
-        max_results=itemCount
+        api_key=api_key
     )
 
     playlist_ids = []
@@ -144,7 +186,13 @@ def request_playlist( playlist_id, api_key):
         request_url,
         headers = request_headers
     )
+    time.sleep(0.5)
     playlist_data = json.loads( json_playlist.text )
+
+    # Check for API error in response
+    if "error" in playlist_data:
+        error = playlist_data["error"]
+        raise ValueError(f"YouTube API error: {error.get('code', 'Unknown')} - {error.get('message', 'No message')}")
 
     return playlist_data
 
@@ -152,64 +200,100 @@ def request_playlist_items( playlist_id, api_key, max_results ):
     request_headers = { "Accept": "application/json" }
     api_parts = [ "contentDetails" ]
     api_base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
-    
-    request_url = build_url( 
-        api_base_url = api_base_url,
-        api_parts = api_parts,
-        playlist_id = playlist_id,
-        api_key = api_key,
-        max_results = max_results
-    )
 
-    json_playlist = requests.get(
-        request_url,
-        headers = request_headers
-    )
-    playlist_data = json.loads( json_playlist.text )
+    # Set per_page = 50 to respect API limits (maxResults 0-50 per page)
+    per_page = 50
+    remaining = max_results if max_results else float('inf')
+    all_items = []
+    page_token = None
 
+    while True:
+        request_url = build_url(
+            api_base_url = api_base_url,
+            api_parts = api_parts,
+            playlist_id = playlist_id,
+            api_key = api_key,
+            max_results = min(per_page, remaining)
+        )
+        if page_token:
+            request_url += f"&pageToken={page_token}"
+
+        json_playlist = requests.get(
+            request_url,
+            headers = request_headers
+        )
+        time.sleep(0.5)
+        playlist_data = json.loads( json_playlist.text )
+
+        # Check for API error in response
+        if "error" in playlist_data:
+            error = playlist_data["error"]
+            raise ValueError(f"YouTube API error: {error.get('code', 'Unknown')} - {error.get('message', 'No message')}")
+
+        all_items.extend(playlist_data.get("items", []))
+        remaining -= len(playlist_data.get("items", []))
+        page_token = playlist_data.get("nextPageToken")
+        if not page_token or remaining <= 0:
+            break
+
+    playlist_data["items"] = all_items
     return playlist_data
 
 def request_playlist_videos( playlist_id, api_key ):
-    playlist_data = request_playlist( 
+    playlist_data = request_playlist(
             playlist_id = playlist_id,
             api_key = api_key
     )
 
     itemCount = playlist_data["items"][0]["contentDetails"]["itemCount"]
 
-    playlist_data = request_playlist_items( 
+    playlist_data = request_playlist_items(
             playlist_id = playlist_id,
             api_key = api_key,
-            max_results = itemCount
+            max_results = None
     )
 
     video_ids = []
-   
-    for video in playlist_data["items"]: 
+
+    for video in playlist_data["items"]:
         if video["kind"] == "youtube#playlistItem":
             video_ids.append( video["contentDetails"]["videoId"] )
 
     return video_ids
 
 def request_videos( video_ids, api_key ):
+    if not video_ids:
+        return {"items": []}
+
     request_headers = { "Accept": "application/json" }
     api_parts = ["snippet", "contentDetails", "statistics", "recordingDetails", "topicDetails"]
-    api_base_url = "https://www.googleapis.com/youtube/v3/videos" 
+    api_base_url = "https://www.googleapis.com/youtube/v3/videos"
 
-    request_url = build_url( 
-        api_base_url = api_base_url,
-        api_parts = api_parts,
-        api_key = api_key,
-        video_ids = video_ids
-    )
+    all_items = []
 
-    json_video = requests.get(
+    for chunk in chunks(video_ids, 50):
+        request_url = build_url(
+            api_base_url = api_base_url,
+            api_parts = api_parts,
+            api_key = api_key,
+            video_ids = chunk
+        )
+
+        json_video = requests.get(
             request_url,
             headers = request_headers
-    )
-    video_data = json.loads( json_video.text )
+        )
+        time.sleep(0.5)
+        video_data = json.loads( json_video.text )
 
-    return video_data
+        # Check for API error in response
+        if "error" in video_data:
+            error = video_data["error"]
+            raise ValueError(f"YouTube API error: {error.get('code', 'Unknown')} - {error.get('message', 'No message')}")
+
+        all_items.extend(video_data.get("items", []))
+
+    return {"items": all_items}
 
 def request_multiple_playlists_videos( playlist_ids, api_key ):
     playlists = []
