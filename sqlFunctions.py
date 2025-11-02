@@ -1,6 +1,7 @@
 from databaseSchema import *
 import datetime
 from sqlalchemy import insert, update
+from sqlalchemy.orm import joinedload
 
 def queryPlaylistVideo( video_id, playlist_id ):
     with get_session() as sess:
@@ -164,9 +165,10 @@ def get_all_channels():
         return sess.query(Channel).all()
 
 def get_all_playlists_for_channel(channel_id):
-    # New function: Returns playlists for a given channel for browsing
-    channel = getChannel(channel_id)
-    return channel.playlists if channel else []
+    # Eager load playlists to avoid DetachedInstanceError when accessing relationship outside session
+    with get_session() as sess:
+        channel = sess.query(Channel).options(joinedload(Channel.playlists)).filter(Channel.id == channel_id).first()
+        return channel.playlists if channel else []
 
 def refresh_playlist(playlist_id, api_key):
     with get_session() as sess:
