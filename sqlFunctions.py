@@ -96,12 +96,30 @@ def addVideo( video_dict ):
         published_at = published_at
     )
     session.merge( video )
-    session.commit()
 
 def addVideos( video_dicts ):
     items = video_dicts["items"]
+
+    # Collect unique channels from videos
+    unique_channels = {}
     for video in items:
-        addVideo( video_dict=video )
+        snippet = video["snippet"]
+        ch_id = snippet["channelId"]
+        ch_name = snippet["channelTitle"]
+        if ch_id not in unique_channels:
+            unique_channels[ch_id] = ch_name
+
+    # Add channels first to satisfy foreign key constraint on videos.channelId
+    for ch_id, ch_name in unique_channels.items():
+        channel = Channel(id=ch_id, name=ch_name)
+        session.merge(channel)
+    session.commit()  # Commit channels before videos
+
+    # Then add videos
+    for video in items:
+        addVideo(video_dict=video)  # Assumes addVideo does extraction and session.merge(video), but no commit inside
+
+    session.commit()  # Commit videos after all are added
 
 def addPlaylist( playlist_dict ):
     items = playlist_dict["items"][0]
