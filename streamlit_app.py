@@ -6,6 +6,9 @@ from sqlFunctions import addPlaylist, addChannel, addVideos, addNewVideosToPlayl
 from utils import extract_playlist_id, extract_channel_id
 from databaseSchema import get_session
 
+# Set wide layout to make tables wider and show more columns
+st.set_page_config(layout="wide")  # Enables wide mode for fuller browser width usage
+
 # Dual loading for compatibility: prefers st.secrets (for Streamlit Cloud/local with secrets.toml), falls back to decouple (for local .env)
 try:
     api_key = st.secrets["SECRET_KEY"]
