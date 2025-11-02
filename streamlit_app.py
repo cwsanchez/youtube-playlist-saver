@@ -63,8 +63,12 @@ if st.session_state.get("page") == "add" or not st.session_state.get("page"):
                 # Error handling for API issues or invalid inputs
                 if "quota" in str(e).lower():
                     st.error("API quota likely exceeded. Wait 24h or get more quota.")
+                    # Rollback session to clean up after error, preventing PendingRollbackError on future queries
+                    session.rollback()
                 else:
                     st.error(f"Error: {str(e)} (Check API key or ID validity)")
+                    # Rollback session to clean up after error, preventing PendingRollbackError on future queries
+                    session.rollback()
 
 if st.session_state.get("page") == "browse":
     st.header("Browse Saved Playlists")
