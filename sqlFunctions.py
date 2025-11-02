@@ -132,13 +132,15 @@ def _add_videos_internal( video_dicts, sess ):
     for ch_id, ch_name in unique_channels.items():
         channel = Channel(id=ch_id, name=ch_name)
         sess.merge(channel)
-    sess.commit()  # Commit channels before videos
+    # Flush after merging channels to make them available for FK references in same transaction, avoiding violations.
+    sess.flush()
 
     # Then add videos
     for video in items:
         addVideo(video_dict=video, sess=sess)  # Assumes addVideo does extraction and sess.merge(video), but no commit inside
 
-    sess.commit()  # Commit videos after all are added
+    # Flush after merging videos to make them available for FK references in same transaction, avoiding violations.
+    sess.flush()
 
 def addPlaylist( playlist_dict ):
     with get_session() as sess:
