@@ -73,7 +73,14 @@ def getChannel( channel_id ):
 
         return channelIdQuery
 
-def addVideo( video_dict, sess ):
+def addVideo( video_dict, sess=None ):
+    if sess is None:
+        with get_session() as sess:
+            _add_video_internal(video_dict, sess)
+    else:
+        _add_video_internal(video_dict, sess)
+
+def _add_video_internal( video_dict, sess ):
     snippet = video_dict["snippet"]
     video_id = video_dict["id"]
     video_channel_name = snippet["channelTitle"]
@@ -102,30 +109,36 @@ def addVideo( video_dict, sess ):
     )
     sess.merge( video )
 
-def addVideos( video_dicts ):
-    with get_session() as sess:
-        items = video_dicts["items"]
+def addVideos( video_dicts, sess=None ):
+    if sess is None:
+        with get_session() as sess:
+            _add_videos_internal(video_dicts, sess)
+    else:
+        _add_videos_internal(video_dicts, sess)
 
-        # Collect unique channels from videos
-        unique_channels = {}
-        for video in items:
-            snippet = video["snippet"]
-            ch_id = snippet["channelId"]
-            ch_name = snippet["channelTitle"]
-            if ch_id not in unique_channels:
-                unique_channels[ch_id] = ch_name
+def _add_videos_internal( video_dicts, sess ):
+    items = video_dicts["items"]
 
-        # Add channels first to satisfy foreign key constraint on videos.channelId
-        for ch_id, ch_name in unique_channels.items():
-            channel = Channel(id=ch_id, name=ch_name)
-            sess.merge(channel)
-        sess.commit()  # Commit channels before videos
+    # Collect unique channels from videos
+    unique_channels = {}
+    for video in items:
+        snippet = video["snippet"]
+        ch_id = snippet["channelId"]
+        ch_name = snippet["channelTitle"]
+        if ch_id not in unique_channels:
+            unique_channels[ch_id] = ch_name
 
-        # Then add videos
-        for video in items:
-            addVideo(video_dict=video, sess=sess)  # Assumes addVideo does extraction and sess.merge(video), but no commit inside
+    # Add channels first to satisfy foreign key constraint on videos.channelId
+    for ch_id, ch_name in unique_channels.items():
+        channel = Channel(id=ch_id, name=ch_name)
+        sess.merge(channel)
+    sess.commit()  # Commit channels before videos
 
-        sess.commit()  # Commit videos after all are added
+    # Then add videos
+    for video in items:
+        addVideo(video_dict=video, sess=sess)  # Assumes addVideo does extraction and sess.merge(video), but no commit inside
+
+    sess.commit()  # Commit videos after all are added
 
 def addPlaylist( playlist_dict ):
     with get_session() as sess:
@@ -177,7 +190,8 @@ def refresh_playlist(playlist_id, api_key):
         playlist_data = request_playlist(playlist_id, api_key)  # To get channel etc if needed
         video_ids = request_playlist_videos(playlist_id, api_key)
         video_data = request_videos(video_ids, api_key)
-        addVideos(video_data)  # Update/add videos
+        # Use same session for addVideos to ensure videos are committed before associations, avoiding FK violations
+        addVideos(video_data, sess=sess)  # Update/add videos
         # Get current active associations
         active_query = sess.query(playlists_videos).filter(playlists_videos.c.playlistId == playlist_id, playlists_videos.c.removed_at.is_(None))
         active_vids = [row.videoId for row in active_query.all()]
@@ -188,9 +202,8 @@ def refresh_playlist(playlist_id, api_key):
         # Add new
         for vid in set(video_ids) - set(active_vids):
             sess.execute(insert(playlists_videos).values({"playlistId": playlist_id, "videoId": vid, "removed_at": None}))
-        sess.commit()
         # Update last_fetched
-        playlist = getPlaylist(playlist_id)
+        playlist = sess.query(Playlist).filter(Playlist.id == playlist_id).first()
         playlist.last_fetched = datetime.datetime.now()
         sess.commit()
 
