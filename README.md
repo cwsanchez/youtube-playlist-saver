@@ -1,35 +1,110 @@
 # YouTube Playlist Saver
 
-This app saves YouTube playlist and channel metadata to a local SQLite database, allowing you to track videos and detect deletions over time. Originally built with a Flask backend, it now features a Streamlit frontend for easy interaction, directly using the API request and database functions.
+A modern web app to save, track, and preserve YouTube playlist metadata. Built with **Next.js 15**, **Supabase**, and **Tailwind CSS**.
+
+Paste a YouTube playlist URL, and the app fetches all video metadata (title, description, thumbnails, view/like counts, duration) and stores it in Supabase. Even if videos are later removed from the playlist, their data is preserved with a soft-delete timestamp.
 
 ## Features
-- Add playlists or entire channels by URL or ID.
-- Browse saved channels, playlists, and videos via dropdowns.
-- Supports URL parsing for playlists (e.g., ?list=...) and channels (e.g., /channel/UC... or @handle).
-- Database stores metadata to preserve history even if videos are deleted on YouTube.
 
-## Setup
-1. Install dependencies: `pip install -r requirements.txt`
-2. Add your YouTube API key to `.env`: `SECRET_KEY="YOUR_KEY_HERE"`
-3. Run the app: `streamlit run streamlit_app.py`
+- **Auto-detect** playlist or video URLs/IDs
+- **Full metadata** preservation (title, description, thumbnail, stats, duration)
+- **Soft-delete tracking** — removed videos are marked, not lost
+- **Refresh** playlists to detect newly added or removed videos
+- **Search & filter** saved playlists
+- **Dark mode** by default with a modern, responsive UI
+- **Pagination** for large playlists
 
-Optional: For PostgreSQL (e.g., Neon), set DATABASE_URL in .streamlit/secrets.toml (local) or Streamlit Cloud secrets (TOML format): DATABASE_URL = "postgresql://user:password@host.neon.tech/dbname?sslmode=require"
-Note: Create the DB on Neon first. The app will create tables if missing.
+## Tech Stack
 
-Note: If you encounter database schema errors after updating the app, delete `playlist_data.db` and re-add your data.
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 15 (App Router, RSC, TypeScript) |
+| UI | Tailwind CSS v4 + shadcn/ui |
+| Database | Supabase (Postgres) |
+| API | YouTube Data API v3 (server-side only) |
+| Deployment | Vercel |
 
-## Usage
-- **Add Data**: Enter a playlist/channel URL or ID, select type, and save.
-- **Browse**: Select channel > playlist to view details in a table.
+## Getting Started
 
-## Deployment to Streamlit Cloud
-1. Push your repo to GitHub.
-2. Create a new app on share.streamlit.io, link to your repo and streamlit_app.py.
-3. In app settings > Secrets, add: SECRET_KEY = "your_youtube_api_key_here" (in TOML format, with quotes).
-4. Redeploy.
+### Prerequisites
 
-Note: The original Flask API (run via `python main.py`) is retained for future extensions but not used in the Streamlit app.
+- Node.js 18+
+- A [Supabase](https://supabase.com) project
+- A [YouTube Data API v3](https://console.cloud.google.com/apis/library/youtube.googleapis.com) key
 
-## Dependencies
-- Streamlit for frontend
-- Requests, SQLAlchemy, etc., for backend logic (see requirements.txt)
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/cwsanchez/youtube-playlist-saver.git
+cd youtube-playlist-saver
+npm install
+```
+
+### 2. Set Up Supabase
+
+Run the SQL migration in your Supabase SQL Editor (Dashboard → SQL Editor):
+
+```sql
+-- Copy the contents of supabase/migrations/001_initial_schema.sql
+```
+
+Or use the Supabase CLI:
+
+```bash
+supabase db push
+```
+
+### 3. Configure Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in your keys:
+
+```bash
+cp .env.example .env.local
+```
+
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (server-only) |
+| `YOUTUBE_API_KEY` | YouTube Data API v3 key |
+
+### 4. Run Development Server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+## Deploy to Vercel
+
+1. Push to GitHub
+2. Import in [Vercel](https://vercel.com/new)
+3. Add the four environment variables above
+4. Deploy
+
+## Database Schema
+
+```
+channels       playlists           videos              playlists_videos
+──────────     ─────────────       ──────────          ────────────────
+id (PK)        id (PK)             id (PK)             playlist_id (FK)
+name           name                name                video_id (FK)
+created_at     description         description         removed_at
+               channel_id (FK)     channel_id (FK)
+               last_fetched        thumbnail_url
+               created_at          published_at
+                                   view_count
+                                   like_count
+                                   duration
+                                   created_at
+```
+
+## Legacy Code
+
+The original Python/Streamlit/Flask application is preserved in the `/legacy/` folder for reference.
+
+## License
+
+MIT
