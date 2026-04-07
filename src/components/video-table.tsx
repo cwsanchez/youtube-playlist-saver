@@ -94,7 +94,6 @@ export function VideoTable({
                         width={120}
                         height={68}
                         className="w-24 h-auto rounded-md object-cover"
-                        unoptimized
                       />
                     ) : (
                       <div className="w-24 h-14 rounded-md bg-muted flex items-center justify-center text-xs text-muted-foreground">

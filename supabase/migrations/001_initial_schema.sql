@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS videos (
   channel_id TEXT REFERENCES channels(id),
   thumbnail_url TEXT,
   published_at TIMESTAMPTZ,
-  view_count INTEGER,
-  like_count INTEGER,
+  view_count BIGINT,
+  like_count BIGINT,
   duration TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
