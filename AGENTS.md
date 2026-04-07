@@ -4,31 +4,48 @@
 
 ### Project Overview
 
-YouTube Playlist Saver — a Python app that saves YouTube playlist/channel metadata to SQLite (default) or PostgreSQL. Two interfaces: **Streamlit** (primary UI) and **Flask REST API** (legacy).
+YouTube Playlist Saver — a Next.js 15 (App Router, TypeScript) app that saves YouTube playlist/channel metadata to Supabase (Postgres). Dark-mode-first UI with shadcn/ui + Tailwind CSS v4.
 
 ### Services
 
 | Service | Command | Port | Notes |
 |---------|---------|------|-------|
-| Streamlit (primary) | `streamlit run streamlit_app.py --server.port 8501 --server.headless true` | 8501 | Main UI |
-| Flask API (legacy) | `python3 main.py` | 5000 | Has a pre-existing `DetachedInstanceError` on the GET `/playlist/<id>` endpoint |
+| Next.js Dev | `npm run dev` | 3000 | Main app |
 
 ### Prerequisites
 
-- **`YOUTUBE_API_KEY`** env var must be set (injected as a Cursor secret). On startup, create `.env` with `SECRET_KEY=$YOUTUBE_API_KEY` and `.streamlit/secrets.toml` with `SECRET_KEY = "<key>"` — both are gitignored / not committed.
-- The app reads the API key via `python-decouple` (`.env`) and `st.secrets` (`.streamlit/secrets.toml`). Both must exist for the full app to work.
-- SQLite DB (`playlist_data.db`) is auto-created on first run.
+- **Node.js 18+**
+- **Environment variables**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `YOUTUBE_API_KEY` — set in `.env.local`.
+- **Supabase tables**: Run `supabase/migrations/001_initial_schema.sql` in the Supabase SQL Editor before first use.
 
 ### Gotchas
 
-- There is no `python` binary on the VM; always use `python3`.
-- `pip install` puts scripts in `~/.local/bin` — add it to `PATH` before running `streamlit`.
-- The Flask API (via `databaseSchema.py`) imports Streamlit and reads `st.secrets`, so `.streamlit/secrets.toml` must exist even when running only the Flask API.
-- Tests in `tests/` are interactive manual scripts (not automated test suites); they require TTY input and a valid API key.
-- The `work_in_progressDockerFile` is incomplete and not functional.
+- YouTube API calls are server-side only (Server Actions in `src/app/actions/youtube.ts`).
+- The `SUPABASE_SERVICE_ROLE_KEY` is never exposed to the client.
+- Legacy Python/Streamlit/Flask code lives in `/legacy/` for reference.
 
 ### Lint / Test / Build
 
-- **No linter configured** in the repo. You can run `python3 -m py_compile <file>` to syntax-check individual files.
-- **No automated test suite**. Tests are manual scripts under `tests/`.
-- **No build step** — run directly with Python.
+- **Lint**: `npm run lint` (ESLint + Next.js rules)
+- **Build**: `npm run build`
+- **No automated test suite** currently. Test manually via the dev server.
+
+### Project Structure
+
+```
+src/
+  app/
+    page.tsx              # Homepage / Dashboard
+    [playlistId]/page.tsx # Playlist detail
+    actions/youtube.ts    # Server Actions
+    layout.tsx            # Root layout (dark mode, Toaster)
+  components/             # UI components
+  lib/
+    supabase/             # Supabase client (server + browser)
+    youtube/              # YouTube API, URL parsing, types
+    format.ts             # Formatting utilities
+    utils.ts              # shadcn utils
+supabase/
+  migrations/             # SQL migration files
+legacy/                   # Old Python/Streamlit/Flask code
+```
